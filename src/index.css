@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-tap-highlight-color: transparent;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Nunito', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    min-height: 100dvh;
+    background: #1e1b4b;
+    color: white;
+    overflow-x: hidden;
+  }
+
+  #root {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+}
+
+@layer components {
+  .star-btn {
+    @apply px-6 py-3 rounded-2xl font-bold text-lg transition-all duration-150 active:scale-95 select-none cursor-pointer;
+  }
+
+  .star-btn-primary {
+    @apply star-btn bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/50;
+  }
+
+  .star-btn-green {
+    @apply star-btn bg-green-500 hover:bg-green-400 text-white shadow-lg shadow-green-900/50;
+  }
+
+  .star-btn-red {
+    @apply star-btn bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-900/50;
+  }
+
+  .star-btn-amber {
+    @apply star-btn bg-amber-500 hover:bg-amber-400 text-white shadow-lg shadow-amber-900/50;
+  }
+
+  .star-card {
+    @apply bg-white/10 backdrop-blur-sm rounded-3xl p-4 border border-white/20;
+  }
+
+  .star-card-solid {
+    @apply bg-white/15 rounded-3xl p-4 border border-white/25 shadow-xl;
+  }
+
+  .task-tile-positive {
+    @apply bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 cursor-pointer
+           transition-all duration-150 active:scale-95 shadow-lg shadow-green-900/40
+           border border-green-400/30 select-none;
+  }
+
+  .task-tile-negative {
+    @apply bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-4 cursor-pointer
+           transition-all duration-150 active:scale-95 shadow-lg shadow-red-900/40
+           border border-red-400/30 select-none;
+  }
+
+  .reward-tile {
+    @apply bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-4 cursor-pointer
+           transition-all duration-150 active:scale-95 shadow-lg shadow-amber-900/40
+           border border-amber-400/30 select-none;
+  }
+
+  .pin-input {
+    @apply w-14 h-14 text-center text-2xl font-bold bg-white/20 border-2 border-white/30
+           rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-violet-400
+           focus:bg-white/30 transition-all duration-150;
+  }
+
+  .tab-active {
+    @apply bg-violet-600 text-white shadow-lg;
+  }
+
+  .tab-inactive {
+    @apply text-white/60 hover:text-white hover:bg-white/10;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer utilities {
+  .text-shadow {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  }
+
+  .glow-violet {
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.5), 0 0 60px rgba(124, 58, 237, 0.2);
+  }
+
+  .glow-green {
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.5), 0 0 60px rgba(34, 197, 94, 0.2);
+  }
+
+  .glow-amber {
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.5), 0 0 60px rgba(245, 158, 11, 0.2);
+  }
+}
+
+/* Number counting animation */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.count-animate {
+  animation: countUp 0.3s ease-out forwards;
+}
+
+/* Flame pulse for streak */
+@keyframes flamePulse {
+  0%, 100% { transform: scaleY(1) scaleX(1); }
+  50% { transform: scaleY(1.1) scaleX(0.95); }
+}
+
+.flame-pulse {
+  animation: flamePulse 1.5s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
+/* Stars twinkling in background */
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+.star-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+/* Shine effect for level badge */
+@keyframes shine {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.shine-effect {
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shine 3s linear infinite;
+}
+
+/* Safe area insets for mobile */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
