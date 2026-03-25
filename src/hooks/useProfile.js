@@ -1,5 +1,6 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useContext } from 'react'
 import { getProfile, saveProfile as saveProfileData, subscribeToProfile } from '../lib/dataLayer'
+import { AuthContext } from '../App'
 
 const DEFAULT_PROFILE = {
   id: 'default',
@@ -40,24 +41,25 @@ function loadProfileSync() {
  * Accepts an optional userId for Supabase integration.
  * Initializes from localStorage instantly, then syncs with Supabase in background.
  */
-export function useProfile(userId = 'local') {
+export function useProfile() {
+  const { userId } = useContext(AuthContext)
   const [profile, setProfileState] = useState(() => loadProfileSync())
   const syncedRef = useRef(false)
 
-  // Sync with Supabase on mount (background, non-blocking)
+  // Sync with Supabase on mount — Supabase is source of truth, always wins
   useEffect(() => {
     if (!userId || userId === 'local') return
-    if (syncedRef.current) return
-    syncedRef.current = true
+    syncedRef.current = false // re-sync whenever userId changes
 
     getProfile(userId).then((data) => {
       if (data) {
-        setProfileState((prev) => ({ ...DEFAULT_PROFILE, ...data, ...prev }))
-        // Write merged state back to localStorage
-        localStorage.setItem('starpoints_profile', JSON.stringify({ ...DEFAULT_PROFILE, ...data }))
+        const merged = { ...DEFAULT_PROFILE, ...data }
+        setProfileState(merged)
+        // Update localStorage cache to match Supabase
+        localStorage.setItem('starpoints_profile', JSON.stringify(merged))
       }
     }).catch(() => {
-      // Silently ignore — localStorage fallback is already loaded
+      // Silently ignore — localStorage fallback already loaded
     })
   }, [userId])
 

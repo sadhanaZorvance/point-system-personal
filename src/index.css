@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --color-primary: #7c3aed;
+    --color-secondary: #4f46e5;
+  }
+
   * {
     -webkit-tap-highlight-color: transparent;
     box-sizing: border-box;
@@ -36,7 +41,12 @@
   }
 
   .star-btn-primary {
-    @apply star-btn bg-violet-600 hover:bg-violet-500 text-white shadow-lg shadow-violet-900/50;
+    @apply star-btn text-white shadow-lg;
+    background-color: var(--color-primary);
+  }
+
+  .star-btn-primary:hover {
+    filter: brightness(1.15);
   }
 
   .star-btn-green {
@@ -52,39 +62,52 @@
   }
 
   .star-card {
-    @apply bg-white/10 backdrop-blur-sm rounded-3xl p-4 border border-white/20;
+    @apply bg-white/10 backdrop-blur-sm rounded-3xl p-4 border border-white/15;
   }
 
   .star-card-solid {
     @apply bg-white/15 rounded-3xl p-4 border border-white/25 shadow-xl;
   }
 
+  /* New compact tile classes using theme colors */
   .task-tile-positive {
-    @apply bg-gradient-to-br from-green-500 to-green-600 rounded-2xl p-4 cursor-pointer
-           transition-all duration-150 active:scale-95 shadow-lg shadow-green-900/40
-           border border-green-400/30 select-none;
+    @apply rounded-2xl p-3 cursor-pointer transition-all duration-150 active:scale-95
+           select-none relative overflow-hidden;
+    background: rgba(6, 78, 59, 0.55);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    color: #d1fae5;
   }
 
   .task-tile-negative {
-    @apply bg-gradient-to-br from-red-500 to-red-600 rounded-2xl p-4 cursor-pointer
-           transition-all duration-150 active:scale-95 shadow-lg shadow-red-900/40
-           border border-red-400/30 select-none;
+    @apply rounded-2xl p-3 cursor-pointer transition-all duration-150 active:scale-95
+           select-none relative overflow-hidden;
+    background: rgba(69, 10, 10, 0.65);
+    border: 1px solid rgba(248, 113, 113, 0.25);
+    color: #fee2e2;
   }
 
   .reward-tile {
-    @apply bg-gradient-to-br from-amber-500 to-amber-600 rounded-2xl p-4 cursor-pointer
-           transition-all duration-150 active:scale-95 shadow-lg shadow-amber-900/40
-           border border-amber-400/30 select-none;
+    @apply rounded-2xl p-3 cursor-pointer transition-all duration-150 active:scale-95
+           select-none relative overflow-hidden;
+    background: rgba(78, 33, 4, 0.65);
+    border: 1px solid rgba(251, 191, 36, 0.25);
+    color: #fef3c7;
   }
 
   .pin-input {
     @apply w-14 h-14 text-center text-2xl font-bold bg-white/20 border-2 border-white/30
-           rounded-xl text-white placeholder-white/30 focus:outline-none focus:border-violet-400
+           rounded-xl text-white placeholder-white/30 focus:outline-none
            focus:bg-white/30 transition-all duration-150;
+    border-color: rgba(255,255,255,0.3);
+  }
+
+  .pin-input:focus {
+    border-color: var(--color-primary);
   }
 
   .tab-active {
-    @apply bg-violet-600 text-white shadow-lg;
+    @apply text-white shadow-lg;
+    background-color: var(--color-primary);
   }
 
   .tab-inactive {
@@ -99,6 +122,12 @@
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
+
+  /* Bottom nav safe area */
+  .bottom-nav {
+    @apply fixed bottom-0 left-0 right-0 z-50;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 @layer utilities {
@@ -108,6 +137,10 @@
 
   .text-shadow-lg {
     text-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+  }
+
+  .glow-primary {
+    box-shadow: 0 0 20px var(--color-primary), 0 0 60px color-mix(in srgb, var(--color-primary) 40%, transparent);
   }
 
   .glow-violet {
@@ -173,4 +206,25 @@
 
 .safe-bottom {
   padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Range slider thumb — hue sliders in Settings */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid rgba(0,0,0,0.3);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid rgba(0,0,0,0.3);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }

@@ -33,7 +33,7 @@ export async function getProfile(userId) {
       .from('profiles')
       .select('*')
       .eq('user_id', userId)
-      .single()
+      .maybeSingle()
     if (data && !error) return data
   }
   return LS.get('profile')

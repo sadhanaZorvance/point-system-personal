@@ -1,10 +1,11 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useContext } from 'react'
 import { getTodayString } from '../utils/timeOfDay'
 import {
   getTransactions,
   addTransactionRecord,
   removeTransactionRecord,
 } from '../lib/dataLayer'
+import { AuthContext } from '../App'
 
 function loadTransactionsSync() {
   try {
@@ -20,7 +21,8 @@ function loadTransactionsSync() {
  * Hook for managing point transactions.
  * Accepts an optional userId for Supabase integration.
  */
-export function useTransactions(userId = 'local') {
+export function useTransactions() {
+  const { userId } = useContext(AuthContext)
   const [transactions, setTransactions] = useState(() => loadTransactionsSync())
   const syncedRef = useRef(false)
 

@@ -9,6 +9,10 @@ export default {
       fontFamily: {
         sans: ['Nunito', 'system-ui', 'sans-serif'],
       },
+      colors: {
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+      },
       animation: {
         'bounce-slow': 'bounce 2s infinite',
         'pulse-slow': 'pulse 3s infinite',
@@ -39,16 +43,33 @@ export default {
         'night-gradient': 'linear-gradient(135deg, #0f0a1e 0%, #1a0533 50%, #0d0d2b 100%)',
         'star-pattern': 'radial-gradient(ellipse at top, #1e1b4b 0%, #0f0722 100%)',
       },
-      colors: {
-        'star-gold': '#fbbf24',
-        'star-violet': '#7c3aed',
-        'star-green': '#22c55e',
-        'star-red': '#ef4444',
-      }
     },
   },
   plugins: [],
   safelist: [
+    // Gradient from/via/to safelist for all theme packs
+    {
+      pattern: /^from-(violet|indigo|slate|blue|orange|green|emerald|teal|cyan|red|rose|yellow|zinc|neutral|stone|lime|purple|amber|sky|pink|fuchsia|white|black|gray)-(50|100|200|300|400|500|600|700|800|900|950)$/,
+    },
+    {
+      pattern: /^via-(violet|indigo|slate|blue|orange|green|emerald|teal|cyan|red|rose|yellow|zinc|neutral|stone|lime|purple|amber|sky|pink|fuchsia|white|black|gray)-(50|100|200|300|400|500|600|700|800|900|950)$/,
+    },
+    {
+      pattern: /^to-(violet|indigo|slate|blue|orange|green|emerald|teal|cyan|red|rose|yellow|zinc|neutral|stone|lime|purple|amber|sky|pink|fuchsia|white|black|gray)-(50|100|200|300|400|500|600|700|800|900|950)$/,
+    },
+    // bg colors for task/reward tiles
+    {
+      pattern: /^bg-(emerald|rose|amber|teal|green|red|lime|orange|yellow|cyan|violet|indigo)-(700|800|900)\/(60|70|80)$/,
+    },
+    // border colors for task/reward tiles
+    {
+      pattern: /^border-(emerald|rose|amber|teal|green|red|lime|orange|yellow|cyan|violet|indigo)-(600|700)\/\d+$/,
+    },
+    // text colors for task/reward tiles
+    {
+      pattern: /^text-(emerald|rose|amber|teal|green|red|lime|orange|yellow|cyan|violet|indigo)-(100|200)$/,
+    },
+    // Legacy safelisted classes
     'from-yellow-400', 'to-orange-500',
     'from-blue-500', 'to-indigo-600',
     'from-violet-900', 'to-indigo-900',

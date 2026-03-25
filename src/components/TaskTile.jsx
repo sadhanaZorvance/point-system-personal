@@ -2,36 +2,47 @@ import React from 'react'
 import { motion } from 'framer-motion'
 
 /**
- * Task tile for Parent Panel — tappable to trigger task completion.
+ * Compact TaskTile — designed for 2-col grid layout.
+ * Approx 80px tall, emoji + points badge + task name.
  */
-export default function TaskTile({ task, onTap, disabled = false }) {
+export default function TaskTile({ task, onTap, disabled = false, multiplier = 1 }) {
   const isPositive = task.points > 0
   const absPoints = Math.abs(task.points)
+  const effectivePoints = isPositive ? absPoints * multiplier : absPoints
 
-  const tileClass = isPositive ? 'task-tile-positive' : 'task-tile-negative'
+  const tileClasses = isPositive
+    ? 'bg-emerald-800/60 border border-emerald-600/30 text-emerald-100'
+    : 'bg-rose-900/60 border border-rose-700/30 text-rose-100'
 
   return (
     <motion.button
-      className={`${tileClass} w-full text-left ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
-      whileTap={disabled ? {} : { scale: 0.95 }}
+      className={`${tileClasses} rounded-2xl p-3 w-full text-left relative select-none overflow-hidden ${
+        disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+      }`}
+      style={{ minHeight: '72px' }}
+      whileHover={disabled ? {} : { scale: 1.03 }}
+      whileTap={disabled ? {} : { scale: 0.97 }}
       onClick={disabled ? undefined : () => onTap(task)}
     >
-      <div className="flex items-center gap-3">
-        <span className="text-3xl flex-shrink-0">{task.emoji}</span>
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-white text-sm leading-tight truncate">{task.name}</p>
-          <p className="text-white/70 text-xs mt-0.5 capitalize">{task.category}</p>
-        </div>
-        <div className={`flex-shrink-0 font-black text-lg text-white`}>
-          {isPositive ? '+' : ''}{task.points}
-        </div>
+      {/* Points badge — top right */}
+      <span className="absolute top-1.5 right-1.5 bg-black/30 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
+        {isPositive ? '+' : '-'}{effectivePoints}
+        {multiplier > 1 && isPositive && (
+          <span className="text-amber-300 ml-0.5">{multiplier}x</span>
+        )}
+      </span>
+
+      {/* Content */}
+      <div className="flex flex-col gap-1 pr-10">
+        <span className="text-2xl leading-none">{task.emoji}</span>
+        <p className="font-bold text-sm leading-tight line-clamp-2">{task.name}</p>
       </div>
     </motion.button>
   )
 }
 
 /**
- * Reward tile for Parent Panel — tappable to redeem a reward.
+ * Compact RewardTile — designed for 2-col grid layout.
  */
 export function RewardTile({ reward, currentBalance, onTap, disabled = false }) {
   const canAfford = currentBalance >= reward.point_cost
@@ -39,31 +50,27 @@ export function RewardTile({ reward, currentBalance, onTap, disabled = false }) 
 
   return (
     <motion.button
-      className={`reward-tile w-full text-left ${isDisabled ? 'opacity-50' : ''}`}
-      whileTap={isDisabled ? {} : { scale: 0.95 }}
+      className={`bg-amber-900/60 border border-amber-600/30 text-amber-100 rounded-2xl p-3 w-full text-left relative select-none overflow-hidden ${
+        isDisabled ? 'opacity-50' : 'cursor-pointer'
+      }`}
+      style={{ minHeight: '72px' }}
+      whileHover={isDisabled ? {} : { scale: 1.03 }}
+      whileTap={isDisabled ? {} : { scale: 0.97 }}
       onClick={isDisabled ? undefined : () => onTap(reward)}
     >
-      <div className="flex items-center gap-3">
-        <span className="text-3xl flex-shrink-0">{reward.emoji}</span>
-        <div className="flex-1 min-w-0">
-          <p className="font-bold text-white text-sm leading-tight truncate">{reward.name}</p>
-          <div className="flex items-center gap-2 mt-0.5">
-            <span className="text-white/70 text-xs capitalize">{reward.category}</span>
-            {reward.weekend_only && (
-              <span className="text-xs bg-white/20 px-1.5 py-0.5 rounded-full text-white/80">🏖️ Weekend</span>
-            )}
-          </div>
-        </div>
-        <div className="flex-shrink-0 text-right">
-          <p className="font-black text-white text-lg">{reward.point_cost}</p>
-          <p className="text-white/60 text-xs">pts</p>
-        </div>
+      {/* Cost badge — top right */}
+      <span className="absolute top-1.5 right-1.5 bg-black/30 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
+        {reward.point_cost}
+      </span>
+
+      {/* Content */}
+      <div className="flex flex-col gap-1 pr-10">
+        <span className="text-2xl leading-none">{reward.emoji}</span>
+        <p className="font-bold text-sm leading-tight line-clamp-2">{reward.name}</p>
+        {reward.weekend_only && (
+          <span className="text-xs text-amber-300/70 font-semibold">🏖️ Weekend</span>
+        )}
       </div>
-      {!canAfford && (
-        <p className="text-white/50 text-xs mt-1 text-right">
-          Need {reward.point_cost - currentBalance} more pts
-        </p>
-      )}
     </motion.button>
   )
 }

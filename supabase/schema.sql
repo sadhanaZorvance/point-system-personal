@@ -4,7 +4,7 @@
 -- ── profiles ─────────────────────────────────────────────────────────────────
 create table if not exists profiles (
   id uuid primary key default gen_random_uuid(),
-  user_id uuid references auth.users(id) on delete cascade,
+  user_id uuid references auth.users(id) on delete cascade unique,
   name text not null default 'Champion',
   avatar text not null default '🦁',
   theme text not null default 'default',

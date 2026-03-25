@@ -1,71 +1,63 @@
-import React, { useState, useEffect, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useProfile } from '../hooks/useProfile'
 import { useTransactions } from '../hooks/useTransactions'
 import { useTasks, ALL_BADGES } from '../hooks/useTasks'
-import PinModal from '../components/PinModal'
+import { useTheme } from '../hooks/useTheme'
 import PointCounter from '../components/PointCounter'
-import StreakFlame from '../components/StreakFlame'
 import LevelBadge from '../components/LevelBadge'
 import GoalProgressBar from '../components/GoalProgressBar'
-import { getTheme } from '../utils/theme'
-import { getThemeName, getGreeting, getTodayString } from '../utils/timeOfDay'
-import { generatePDF } from '../utils/generatePDF'
+import BottomNav from '../components/BottomNav'
+import ThemeBackground from '../components/ThemeBackground'
+import { getGreeting, getTodayString } from '../utils/timeOfDay'
+import { getLevelInfo, getNextLevel, getLevelProgress, pointsToNextLevel } from '../utils/levels'
+import { fireConfetti } from '../components/ConfettiEffect'
 
 export default function HomeScreen() {
-  const navigate = useNavigate()
-  const { profile, verifyPin } = useProfile()
+  const { profile } = useProfile()
   const { getTodaySummary } = useTransactions()
   const { tasks, rewards, badges } = useTasks()
+  const theme = useTheme()
 
-  const [showParentPin, setShowParentPin] = useState(false)
-  const [showAdminPin, setShowAdminPin] = useState(false)
   const [currentTime, setCurrentTime] = useState(new Date())
-  const [pdfLoading, setPdfLoading] = useState(false)
+  const [prevBalance, setPrevBalance] = useState(profile.current_balance)
 
-  // Update time every minute for live greeting/theme
+  // Fire confetti when balance increases
+  useEffect(() => {
+    if (profile.current_balance > prevBalance) {
+      fireConfetti(profile.current_balance - prevBalance >= 15 ? 'high' : 'medium')
+    }
+    setPrevBalance(profile.current_balance)
+  }, [profile.current_balance]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Update time every minute for live greeting
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000)
     return () => clearInterval(interval)
   }, [])
 
-  const themeName = profile.theme !== 'default' ? profile.theme : getThemeName(currentTime)
-  const theme = getTheme(themeName)
   const greeting = getGreeting(profile.name, currentTime)
   const todaySummary = getTodaySummary()
-
   const earnedBadgeKeys = new Set(badges.map((b) => b.badge_key))
 
-  // Check if multiplier is active today
+  // Bonus multiplier
   const today = getTodayString()
   const effectiveMultiplier =
     profile.bonus_multiplier > 1 && profile.bonus_multiplier_date === today
       ? profile.bonus_multiplier
       : 1
 
-  const handleParentSuccess = useCallback(() => {
-    setShowParentPin(false)
-    navigate('/parent')
-  }, [navigate])
+  // Level progress
+  const currentLevelInfo = getLevelInfo(profile.lifetime_points)
+  const nextLevelInfo = getNextLevel(profile.lifetime_points)
+  const levelProgress = getLevelProgress(profile.lifetime_points)
+  const ptsToNext = pointsToNextLevel(profile.lifetime_points)
 
-  const handleAdminSuccess = useCallback(() => {
-    setShowAdminPin(false)
-    navigate('/admin')
-  }, [navigate])
+  const goalReward = profile.goal_reward_id || profile.goal_reward_name
+    ? { name: profile.goal_reward_name, cost: profile.goal_reward_cost, emoji: '🎯' }
+    : null
 
-  const handlePrint = useCallback(async () => {
-    setPdfLoading(true)
-    try {
-      generatePDF(profile, tasks, rewards)
-    } catch (err) {
-      console.error('PDF generation error:', err)
-    } finally {
-      setPdfLoading(false)
-    }
-  }, [profile, tasks, rewards])
-
-  // Generate star background for night/evening themes
+  // Stars for themes that have them
   const stars = theme.stars
     ? Array.from({ length: 30 }, (_, i) => ({
         id: i,
@@ -76,17 +68,16 @@ export default function HomeScreen() {
       }))
     : []
 
-  const goalReward = profile.goal_reward_id
-    ? { name: profile.goal_reward_name, cost: profile.goal_reward_cost, emoji: '🎯' }
-    : null
-
   return (
     <div className={`min-h-screen bg-gradient-to-br ${theme.bgGradient} relative overflow-hidden`}>
+      {/* Per-theme SVG background illustration */}
+      <ThemeBackground themeId={theme.id || (profile.theme || 'cosmic')} />
+
       {/* Decorative background stars */}
       {stars.map((star) => (
         <motion.div
           key={star.id}
-          className="absolute rounded-full bg-white star-twinkle"
+          className="absolute rounded-full bg-white star-twinkle pointer-events-none"
           style={{
             left: `${star.x}%`,
             top: `${star.y}%`,
@@ -99,38 +90,37 @@ export default function HomeScreen() {
         />
       ))}
 
-      <div className="relative z-10 flex flex-col min-h-screen px-4 pt-safe-top pb-safe-bottom max-w-md mx-auto">
-        {/* ── Header ────────────────────────────────────────────── */}
+      <div className="relative z-10 flex flex-col min-h-screen px-4 max-w-md mx-auto pb-28">
+
+        {/* ── Header ─────────────────────────────────────────────── */}
         <motion.div
-          className="text-center pt-8 pb-4"
+          className="text-center pt-4 pb-1"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <p className="text-white/70 text-lg font-semibold">{greeting}</p>
-          <h1 className="text-4xl font-black text-white text-shadow-lg mt-1">
+          <p className="text-white/70 text-sm font-semibold">{greeting}</p>
+          <h1 className="text-2xl font-black text-white text-shadow-lg mt-0.5">
             {profile.avatar} {profile.name}
           </h1>
         </motion.div>
 
-        {/* ── Giant Point Balance ────────────────────────────────── */}
+        {/* ── Giant Point Balance ─────────────────────────────────── */}
         <motion.div
-          className="text-center py-6"
+          className="text-center py-2"
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 200, delay: 0.15 }}
         >
-          <p className="text-white/60 text-sm font-bold uppercase tracking-widest mb-1">⭐ StarPoints</p>
-          <div className="relative inline-flex flex-col items-center">
-            <PointCounter
-              value={profile.current_balance}
-              className="text-7xl text-white text-shadow-lg"
-            />
-            <p className="text-white/50 text-sm font-semibold mt-1">current balance</p>
-          </div>
+          <p className="text-white/50 text-xs font-bold uppercase tracking-widest mb-0.5">⭐ StarPoints</p>
+          <PointCounter
+            value={profile.current_balance}
+            className="text-6xl text-white text-shadow-lg"
+          />
+          <p className="text-white/40 text-xs font-semibold mt-0.5">current balance</p>
         </motion.div>
 
-        {/* ── Bonus Multiplier Banner ───────────────────────────── */}
+        {/* ── Bonus Multiplier Banner ─────────────────────────────── */}
         <AnimatePresence>
           {effectiveMultiplier > 1 && (
             <motion.div
@@ -138,55 +128,67 @@ export default function HomeScreen() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: -10 }}
               transition={{ type: 'spring', stiffness: 260 }}
-              className={`mb-4 rounded-2xl px-4 py-3 text-center font-black text-lg shadow-xl
-                ${effectiveMultiplier === 3
-                  ? 'bg-gradient-to-r from-violet-600 to-purple-700 shadow-violet-900/50'
-                  : 'bg-gradient-to-r from-amber-500 to-orange-500 shadow-amber-900/50'
-                }`}
+              className={`mb-3 rounded-2xl px-4 py-3 text-center font-black text-base shadow-xl ${
+                effectiveMultiplier === 3
+                  ? 'bg-gradient-to-r from-violet-600 to-purple-700'
+                  : 'bg-gradient-to-r from-amber-500 to-orange-500'
+              }`}
               style={{ animation: 'flamePulse 1.5s ease-in-out infinite' }}
             >
               <span className="text-white">
-                {effectiveMultiplier === 3
-                  ? '⚡ TRIPLE POINTS TODAY!'
-                  : '🌟 DOUBLE POINTS TODAY!'}
+                {effectiveMultiplier === 3 ? '⚡ TRIPLE POINTS TODAY!' : '🌟 DOUBLE POINTS TODAY!'}
               </span>
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ── Stats Row: Streak + Level ──────────────────────────── */}
+        {/* ── Streak + Level + XP bar (single compact card) ──────── */}
         <motion.div
-          className="flex justify-center gap-6 mb-5"
+          className="star-card mb-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25 }}
         >
-          {/* Streak */}
-          <div className="star-card flex-1 flex flex-col items-center py-4">
-            <p className="text-white/50 text-xs font-bold uppercase tracking-wide mb-2">Streak</p>
-            <StreakFlame streak={profile.current_streak} />
+          {/* Streak and Level side by side */}
+          <div className="flex gap-3 mb-2">
+            <div className="flex-1 flex items-center gap-2">
+              <span className="text-xl">{profile.current_streak === 0 ? '💤' : profile.current_streak < 14 ? '🔥' : '⚡'}</span>
+              <div>
+                <p className="text-white/40 text-xs font-bold uppercase tracking-wide">Streak</p>
+                <p className="text-white font-black text-base leading-none">{profile.current_streak} {profile.current_streak === 1 ? 'day' : 'days'}</p>
+              </div>
+            </div>
+            <div className="w-px bg-white/10" />
+            <div className="flex-1 flex items-center gap-2">
+              <span className="text-xl">{currentLevelInfo.emoji}</span>
+              <div>
+                <p className="text-white/40 text-xs font-bold uppercase tracking-wide">Level</p>
+                <p className="text-white font-black text-base leading-none">{currentLevelInfo.name}</p>
+              </div>
+            </div>
           </div>
-
-          {/* Level */}
-          <div className="star-card flex-1 flex flex-col items-center py-4">
-            <p className="text-white/50 text-xs font-bold uppercase tracking-wide mb-2">Level</p>
-            <LevelBadge lifetimePoints={profile.lifetime_points} showProgress={false} />
+          {/* XP bar */}
+          <div className="h-2 bg-white/15 rounded-full overflow-hidden">
+            <motion.div
+              className="h-full rounded-full"
+              style={{ backgroundColor: theme.accentColor }}
+              initial={{ width: 0 }}
+              animate={{ width: `${levelProgress * 100}%` }}
+              transition={{ duration: 1, ease: 'easeOut', delay: 0.5 }}
+            />
+          </div>
+          <div className="flex justify-between text-xs text-white/30 mt-1">
+            <span>{profile.lifetime_points.toLocaleString()} pts</span>
+            {nextLevelInfo
+              ? <span>{ptsToNext} to {nextLevelInfo.emoji} {nextLevelInfo.name}</span>
+              : <span className="text-amber-400 font-bold">MAX LEVEL 💎</span>
+            }
           </div>
         </motion.div>
 
-        {/* ── Level Progress ─────────────────────────────────────── */}
+        {/* ── Goal Progress ────────────────────────────────────────── */}
         <motion.div
-          className="mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <LevelBadge lifetimePoints={profile.lifetime_points} showProgress={true} compact={true} />
-        </motion.div>
-
-        {/* ── Goal Progress ──────────────────────────────────────── */}
-        <motion.div
-          className="mb-4"
+          className="mb-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.35 }}
@@ -199,54 +201,55 @@ export default function HomeScreen() {
           />
         </motion.div>
 
-        {/* ── Today's Summary ────────────────────────────────────── */}
+        {/* ── Today's Summary ─────────────────────────────────────── */}
         <motion.div
-          className="star-card mb-4"
+          className="star-card mb-2"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
         >
-          <p className="text-white/50 text-xs font-bold uppercase tracking-wide mb-3">📅 Today</p>
+          <p className="text-white/50 text-xs font-bold uppercase tracking-wide mb-1.5">📅 Today</p>
           <div className="flex justify-around">
             <div className="text-center">
-              <p className="text-green-400 font-black text-2xl">+{todaySummary.earned}</p>
-              <p className="text-white/50 text-xs">earned</p>
+              <p className="text-green-400 font-black text-lg">+{todaySummary.earned}</p>
+              <p className="text-white/40 text-xs">earned</p>
             </div>
-            <div className="text-center border-x border-white/10 px-6">
-              <p className="text-white font-black text-2xl">{todaySummary.net}</p>
-              <p className="text-white/50 text-xs">net</p>
+            <div className="text-center border-x border-white/10 px-5">
+              <p className="text-white font-black text-lg">{todaySummary.net}</p>
+              <p className="text-white/40 text-xs">net</p>
             </div>
             <div className="text-center">
-              <p className="text-red-400 font-black text-2xl">{todaySummary.spent > 0 ? `-${todaySummary.spent}` : '0'}</p>
-              <p className="text-white/50 text-xs">spent</p>
+              <p className="text-red-400 font-black text-lg">{todaySummary.spent > 0 ? `-${todaySummary.spent}` : '0'}</p>
+              <p className="text-white/40 text-xs">spent</p>
             </div>
           </div>
         </motion.div>
 
-        {/* ── Badge Wall ─────────────────────────────────────────── */}
+        {/* ── Badge Wall ──────────────────────────────────────────── */}
         <motion.div
-          className="star-card mb-6"
+          className="star-card"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45 }}
         >
-          <p className="text-white/50 text-xs font-bold uppercase tracking-wide mb-3">🏅 Badges</p>
-          <div className="grid grid-cols-6 gap-2">
+          <p className="text-white/50 text-xs font-bold uppercase tracking-wide mb-2">🏅 Badges</p>
+          <div className="grid grid-cols-6 gap-1.5">
             {ALL_BADGES.map((badge) => {
               const earned = earnedBadgeKeys.has(badge.key)
               return (
                 <motion.div
                   key={badge.key}
-                  className="flex flex-col items-center gap-0.5 cursor-default"
+                  className="flex items-center justify-center cursor-default"
                   title={`${badge.name}: ${badge.description}`}
                   whileHover={{ scale: 1.1 }}
                 >
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-xl
-                      ${earned
-                        ? 'bg-white/20 border-2 border-amber-400/60 shadow-md'
+                    className={`w-8 h-8 rounded-full flex items-center justify-center text-base ${
+                      earned
+                        ? 'bg-white/20 border-2 shadow-md'
                         : 'bg-black/30 border border-white/10 grayscale opacity-40'
-                      }`}
+                    }`}
+                    style={earned ? { borderColor: `${theme.accentColor}80` } : {}}
                   >
                     {badge.emoji}
                   </div>
@@ -255,73 +258,9 @@ export default function HomeScreen() {
             })}
           </div>
         </motion.div>
-
-        {/* ── Lifetime Points ────────────────────────────────────── */}
-        <motion.div
-          className="text-center mb-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5 }}
-        >
-          <p className="text-white/40 text-xs">
-            🏆 {profile.lifetime_points.toLocaleString()} lifetime points &nbsp;·&nbsp;
-            🔥 Best streak: {profile.longest_streak} days
-          </p>
-        </motion.div>
-
-        {/* ── Action Buttons ─────────────────────────────────────── */}
-        <div className="mt-auto pb-8 flex flex-col gap-3">
-          <div className="grid grid-cols-2 gap-3">
-            <motion.button
-              className="star-btn-primary flex items-center justify-center gap-2 py-4"
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowParentPin(true)}
-            >
-              <span className="text-xl">👨‍👩‍👧</span>
-              <span>Parent Panel</span>
-            </motion.button>
-
-            <motion.button
-              className="star-btn bg-indigo-700 hover:bg-indigo-600 text-white shadow-lg shadow-indigo-900/50 flex items-center justify-center gap-2 py-4"
-              whileTap={{ scale: 0.95 }}
-              onClick={() => setShowAdminPin(true)}
-            >
-              <span className="text-xl">⚙️</span>
-              <span>Admin</span>
-            </motion.button>
-          </div>
-
-          {/* Print Chart button */}
-          <motion.button
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handlePrint}
-            disabled={pdfLoading}
-            className="w-full py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white/70 hover:text-white font-semibold text-sm transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-          >
-            <span>🖨️</span>
-            <span>{pdfLoading ? 'Generating...' : 'Print Chart'}</span>
-          </motion.button>
-        </div>
       </div>
 
-      {/* ── PIN Modals ─────────────────────────────────────────────── */}
-      <PinModal
-        isOpen={showParentPin}
-        onClose={() => setShowParentPin(false)}
-        onSuccess={handleParentSuccess}
-        type="parent"
-        verifyPin={verifyPin}
-      />
-      <PinModal
-        isOpen={showAdminPin}
-        onClose={() => setShowAdminPin(false)}
-        onSuccess={handleAdminSuccess}
-        type="admin"
-        verifyPin={verifyPin}
-      />
+      <BottomNav />
     </div>
   )
 }

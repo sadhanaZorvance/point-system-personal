@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useContext } from 'react'
 import {
   getTasks,
   saveTasks as saveTasksData,
@@ -7,6 +7,7 @@ import {
   getBadges,
   addBadge,
 } from '../lib/dataLayer'
+import { AuthContext } from '../App'
 
 // ─── DEFAULT TASKS ────────────────────────────────────────────────────────────
 
@@ -114,7 +115,8 @@ function loadBadgesSync() {
 
 // ─── HOOK ─────────────────────────────────────────────────────────────────────
 
-export function useTasks(userId = 'local') {
+export function useTasks() {
+  const { userId } = useContext(AuthContext)
   const [tasks, setTasksState] = useState(() => loadTasksSync())
   const [rewards, setRewardsState] = useState(() => loadRewardsSync())
   const [badges, setBadgesState] = useState(() => loadBadgesSync())

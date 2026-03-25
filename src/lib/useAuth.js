@@ -1,48 +1,46 @@
 import { useState, useEffect } from 'react'
 import { supabase, isSupabaseEnabled } from './supabase'
 
+// For personal/single-family use: set VITE_SUPABASE_USER_ID in .env to your
+// Supabase user UUID. This bypasses anonymous sign-in entirely.
+const FIXED_USER_ID = import.meta.env.VITE_SUPABASE_USER_ID || null
+
 /**
- * Simple Supabase Auth hook.
- * - When Supabase is disabled: returns userId='local', isLoading=false immediately.
- * - When Supabase is enabled: checks for existing session, auto-signs-in anonymously if none.
+ * Auth hook — three modes:
+ * 1. VITE_SUPABASE_USER_ID set → use that UUID directly (personal app mode)
+ * 2. Supabase enabled, no fixed ID → check for existing session
+ * 3. No Supabase → localStorage only (userId = 'local')
  */
 export function useAuth() {
-  const [userId, setUserId] = useState(isSupabaseEnabled ? null : 'local')
-  const [isLoading, setIsLoading] = useState(isSupabaseEnabled)
+  const [userId, setUserId] = useState(() => {
+    if (!isSupabaseEnabled) return 'local'
+    if (FIXED_USER_ID) return FIXED_USER_ID   // instant, no loading
+    return null
+  })
+  const [isLoading, setIsLoading] = useState(isSupabaseEnabled && !FIXED_USER_ID)
 
   useEffect(() => {
+    // Mode 1: fixed user ID — nothing to do, already set in useState
+    if (FIXED_USER_ID) return
+
+    // Mode 3: no Supabase
     if (!isSupabaseEnabled || !supabase) {
       setUserId('local')
       setIsLoading(false)
       return
     }
 
+    // Mode 2: check for existing Supabase session
     let mounted = true
 
     async function initAuth() {
       try {
-        // Check for an existing session first
         const { data: { session } } = await supabase.auth.getSession()
-        if (session?.user && mounted) {
-          setUserId(session.user.id)
-          setIsLoading(false)
-          return
-        }
-
-        // No session — sign in anonymously
-        const { data, error } = await supabase.auth.signInAnonymously()
         if (mounted) {
-          if (data?.user) {
-            setUserId(data.user.id)
-          } else {
-            console.warn('Anonymous sign-in failed:', error?.message)
-            // Fall back to local mode so the app still works
-            setUserId('local')
-          }
+          setUserId(session?.user?.id || 'local')
           setIsLoading(false)
         }
-      } catch (err) {
-        console.warn('Auth init error:', err)
+      } catch {
         if (mounted) {
           setUserId('local')
           setIsLoading(false)
@@ -52,11 +50,8 @@ export function useAuth() {
 
     initAuth()
 
-    // Listen for auth state changes (e.g. tab restore)
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (mounted && session?.user) {
-        setUserId(session.user.id)
-      }
+      if (mounted) setUserId(session?.user?.id || 'local')
     })
 
     return () => {
@@ -65,10 +60,5 @@ export function useAuth() {
     }
   }, [])
 
-  const signIn = async (email, password) => {
-    if (!isSupabaseEnabled || !supabase) return { error: 'Supabase not configured' }
-    return supabase.auth.signInWithPassword({ email, password })
-  }
-
-  return { userId, isLoading, signIn }
+  return { userId, isLoading }
 }
