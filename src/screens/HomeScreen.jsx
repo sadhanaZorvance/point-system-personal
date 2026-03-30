@@ -70,7 +70,7 @@ export default function HomeScreen() {
     : []
 
   return (
-    <div className={`h-screen h-[100dvh] bg-gradient-to-br ${theme.bgGradient} relative overflow-hidden`}>
+    <div className={`h-full bg-gradient-to-br ${theme.bgGradient} relative overflow-hidden`}>
       {/* Per-theme SVG background illustration */}
       <ThemeBackground themeId={theme.id || (profile.theme || 'cosmic')} />
 

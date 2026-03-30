@@ -175,7 +175,7 @@ export default function ParentPanel() {
     : 1
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.bgGradient} relative`}>
+    <div className={`h-full bg-gradient-to-br ${theme.bgGradient} relative overflow-y-auto scrollbar-hide`}>
       {/* Level Up Overlay */}
       {levelUpInfo && (
         <LevelUpCelebration
