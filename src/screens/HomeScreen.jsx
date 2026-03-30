@@ -57,7 +57,7 @@ export default function HomeScreen() {
     ? { name: profile.goal_reward_name, cost: profile.goal_reward_cost, emoji: '🎯' }
     : null
 
-  // Stars for themes that have them
+  // Stars for themes that have them — random positions and gentle drift
   const stars = theme.stars
     ? Array.from({ length: 30 }, (_, i) => ({
         id: i,
@@ -65,32 +65,35 @@ export default function HomeScreen() {
         y: Math.random() * 60,
         size: Math.random() * 3 + 1,
         delay: Math.random() * 3,
+        drift: (Math.random() - 0.5) * 20,
       }))
     : []
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.bgGradient} relative overflow-hidden`}>
+    <div className={`h-screen h-[100dvh] bg-gradient-to-br ${theme.bgGradient} relative overflow-hidden`}>
       {/* Per-theme SVG background illustration */}
       <ThemeBackground themeId={theme.id || (profile.theme || 'cosmic')} />
 
-      {/* Decorative background stars */}
+      {/* Decorative background stars — gentle random drift */}
       {stars.map((star) => (
         <motion.div
           key={star.id}
-          className="absolute rounded-full bg-white star-twinkle pointer-events-none"
+          className="absolute rounded-full bg-white pointer-events-none"
           style={{
             left: `${star.x}%`,
             top: `${star.y}%`,
             width: star.size,
             height: star.size,
-            animationDelay: `${star.delay}s`,
           }}
-          animate={{ opacity: [0.2, 0.9, 0.2] }}
-          transition={{ duration: 2 + star.delay, repeat: Infinity, ease: 'easeInOut' }}
+          animate={{
+            opacity: [0.2, 0.9, 0.2],
+            x: [0, star.drift, 0],
+          }}
+          transition={{ duration: 3 + star.delay, repeat: Infinity, ease: 'easeInOut' }}
         />
       ))}
 
-      <div className="relative z-10 flex flex-col min-h-screen px-4 max-w-md mx-auto pb-28">
+      <div className="relative z-10 flex flex-col h-full px-4 max-w-md mx-auto pb-28 overflow-y-auto scrollbar-hide">
 
         {/* ── Header ─────────────────────────────────────────────── */}
         <motion.div

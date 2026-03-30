@@ -1,9 +1,20 @@
 import { useEffect, useRef } from 'react'
 import confetti from 'canvas-confetti'
 
+const COLORS = ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6', '#60a5fa']
+
+function randomOrigin() {
+  return { x: 0.15 + Math.random() * 0.7, y: 0.3 + Math.random() * 0.4 }
+}
+
+function randomAngle() {
+  return 55 + Math.random() * 70
+}
+
 /**
  * Fires confetti when `trigger` changes to true.
  * Pass `intensity` as 'low' | 'medium' | 'high'.
+ * Origins and angles are randomized each time.
  */
 export default function ConfettiEffect({ trigger, intensity = 'medium' }) {
   const firedRef = useRef(false)
@@ -16,61 +27,7 @@ export default function ConfettiEffect({ trigger, intensity = 'medium' }) {
     if (firedRef.current) return
     firedRef.current = true
 
-    const configs = {
-      low: [
-        {
-          particleCount: 40,
-          spread: 60,
-          origin: { y: 0.6 },
-          colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399'],
-        },
-      ],
-      medium: [
-        {
-          particleCount: 80,
-          spread: 70,
-          origin: { x: 0.3, y: 0.6 },
-          colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6'],
-        },
-        {
-          particleCount: 80,
-          spread: 70,
-          origin: { x: 0.7, y: 0.6 },
-          colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6'],
-        },
-      ],
-      high: [
-        {
-          particleCount: 120,
-          spread: 100,
-          origin: { x: 0.2, y: 0.5 },
-          colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6', '#60a5fa'],
-          shapes: ['star', 'circle'],
-          scalar: 1.2,
-        },
-        {
-          particleCount: 120,
-          spread: 100,
-          origin: { x: 0.8, y: 0.5 },
-          colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6', '#60a5fa'],
-          shapes: ['star', 'circle'],
-          scalar: 1.2,
-        },
-        {
-          particleCount: 60,
-          spread: 120,
-          origin: { x: 0.5, y: 0.3 },
-          colors: ['#fbbf24', '#fde68a', '#ffffff'],
-          shapes: ['star'],
-          scalar: 1.5,
-        },
-      ],
-    }
-
-    const shots = configs[intensity] || configs.medium
-    shots.forEach((opts, i) => {
-      setTimeout(() => confetti(opts), i * 150)
-    })
+    fireConfetti(intensity)
   }, [trigger, intensity])
 
   return null
@@ -78,53 +35,48 @@ export default function ConfettiEffect({ trigger, intensity = 'medium' }) {
 
 /**
  * Fire confetti programmatically (not component-based).
+ * Origins and spread angles are randomized for variety.
  */
 export function fireConfetti(intensity = 'medium') {
   if (intensity === 'low') {
     confetti({
       particleCount: 40,
-      spread: 60,
-      origin: { y: 0.6 },
-      colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399'],
+      spread: 50 + Math.random() * 30,
+      angle: randomAngle(),
+      origin: randomOrigin(),
+      colors: COLORS.slice(0, 4),
     })
     return
   }
 
   if (intensity === 'high') {
-    confetti({
-      particleCount: 120,
-      spread: 100,
-      origin: { x: 0.2, y: 0.5 },
-      colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6'],
-      shapes: ['star', 'circle'],
-      scalar: 1.2,
-    })
-    setTimeout(() => {
-      confetti({
-        particleCount: 120,
-        spread: 100,
-        origin: { x: 0.8, y: 0.5 },
-        colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6'],
-        shapes: ['star', 'circle'],
-        scalar: 1.2,
-      })
-    }, 150)
+    const burstCount = 3
+    for (let i = 0; i < burstCount; i++) {
+      setTimeout(() => {
+        confetti({
+          particleCount: 80 + Math.floor(Math.random() * 50),
+          spread: 80 + Math.random() * 40,
+          angle: randomAngle(),
+          origin: randomOrigin(),
+          colors: COLORS,
+          shapes: ['star', 'circle'],
+          scalar: 1 + Math.random() * 0.4,
+        })
+      }, i * 180)
+    }
     return
   }
 
-  // medium
-  confetti({
-    particleCount: 80,
-    spread: 70,
-    origin: { x: 0.3, y: 0.6 },
-    colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6'],
-  })
-  setTimeout(() => {
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { x: 0.7, y: 0.6 },
-      colors: ['#7c3aed', '#a78bfa', '#fbbf24', '#34d399', '#f472b6'],
-    })
-  }, 150)
+  // medium — two bursts from random spots
+  for (let i = 0; i < 2; i++) {
+    setTimeout(() => {
+      confetti({
+        particleCount: 60 + Math.floor(Math.random() * 40),
+        spread: 60 + Math.random() * 30,
+        angle: randomAngle(),
+        origin: randomOrigin(),
+        colors: COLORS.slice(0, 5),
+      })
+    }, i * 150)
+  }
 }
