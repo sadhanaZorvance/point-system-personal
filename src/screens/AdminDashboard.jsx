@@ -32,7 +32,7 @@ export default function AdminDashboard() {
 
   return (
     <div
-      className={`min-h-screen bg-gradient-to-br ${theme.bgGradient} flex flex-col`}
+      className={`h-full bg-gradient-to-br ${theme.bgGradient} flex flex-col overflow-hidden`}
     >
       {/* ── Top Bar ──────────────────────────────────────────────── */}
       <div className="bg-black/40 backdrop-blur-sm border-b border-white/10 px-4 py-3 flex items-center justify-between sticky top-0 z-20">

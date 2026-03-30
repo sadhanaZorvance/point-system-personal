@@ -119,7 +119,7 @@ export default function App() {
 
   if (auth.isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-violet-950 via-indigo-900 to-purple-950 flex items-center justify-center">
+      <div className="h-full bg-gradient-to-br from-violet-950 via-indigo-900 to-purple-950 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4 animate-bounce">⭐</div>
           <p className="text-white/60 font-semibold">Loading StarPoints...</p>

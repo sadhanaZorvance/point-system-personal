@@ -292,7 +292,7 @@ export default function ActivitiesScreen() {
   const theme = useTheme()
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.bgGradient} relative`}>
+    <div className={`h-full bg-gradient-to-br ${theme.bgGradient} relative overflow-y-auto scrollbar-hide`}>
       <div className="max-w-2xl mx-auto px-4 pt-6 pb-28">
 
         {/* Page title */}

@@ -7,7 +7,7 @@ export default function ChartsScreen() {
   const theme = useTheme()
 
   return (
-    <div className={`min-h-screen bg-gradient-to-br ${theme.bgGradient} relative`}>
+    <div className={`h-full bg-gradient-to-br ${theme.bgGradient} relative overflow-y-auto scrollbar-hide`}>
       <div className="max-w-2xl mx-auto pt-4 pb-24">
         <Analytics />
       </div>
