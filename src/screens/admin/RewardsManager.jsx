@@ -36,93 +36,6 @@ export default function RewardsManager() {
     cancelEdit()
   }
 
-  const RewardForm = () => (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-amber-900/40 rounded-2xl p-4 mb-4 border border-amber-500/40"
-    >
-      <h3 className="text-white font-black mb-4">{isAdding ? '➕ New Reward' : '✏️ Edit Reward'}</h3>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="col-span-2">
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Reward Name *</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-            placeholder="e.g. Extra screen time"
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-amber-400 text-sm"
-          />
-        </div>
-        <div>
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Emoji</label>
-          <input
-            type="text"
-            value={form.emoji}
-            onChange={e => setForm(p => ({ ...p, emoji: e.target.value }))}
-            placeholder="🎁"
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white text-center text-2xl focus:outline-none focus:border-amber-400"
-          />
-        </div>
-        <div>
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Point Cost</label>
-          <input
-            type="number"
-            min="1"
-            value={form.point_cost}
-            onChange={e => setForm(p => ({ ...p, point_cost: Math.max(1, parseInt(e.target.value) || 1) }))}
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-400 text-sm"
-          />
-        </div>
-        <div className="col-span-2">
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Category</label>
-          <div className="flex gap-2">
-            {CATEGORIES.map(cat => (
-              <button
-                key={cat}
-                onClick={() => setForm(p => ({ ...p, category: cat }))}
-                className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all
-                  ${form.category === cat ? 'bg-amber-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
-              >
-                {CATEGORY_LABELS[cat]}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <label className="text-white/60 text-xs font-bold uppercase">Weekend Only</label>
-          <button
-            onClick={() => setForm(p => ({ ...p, weekend_only: !p.weekend_only }))}
-            className={`relative w-12 h-6 rounded-full transition-colors ${form.weekend_only ? 'bg-amber-500' : 'bg-gray-600'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow
-              ${form.weekend_only ? 'translate-x-7' : 'translate-x-1'}`} />
-          </button>
-        </div>
-        <div className="flex items-center gap-3">
-          <label className="text-white/60 text-xs font-bold uppercase">Active</label>
-          <button
-            onClick={() => setForm(p => ({ ...p, is_active: !p.is_active }))}
-            className={`relative w-12 h-6 rounded-full transition-colors ${form.is_active ? 'bg-green-500' : 'bg-gray-600'}`}
-          >
-            <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow
-              ${form.is_active ? 'translate-x-7' : 'translate-x-1'}`} />
-          </button>
-        </div>
-      </div>
-      <div className="flex gap-3 mt-4">
-        <button onClick={cancelEdit} className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-sm">Cancel</button>
-        <button
-          onClick={saveEdit}
-          disabled={!form.name.trim()}
-          className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-black text-sm disabled:opacity-40 transition-all"
-        >
-          {isAdding ? 'Add Reward' : 'Save Changes'}
-        </button>
-      </div>
-    </motion.div>
-  )
-
   return (
     <div className="h-full overflow-y-auto scrollbar-hide px-4 py-4">
       {/* Header */}
@@ -155,7 +68,92 @@ export default function RewardsManager() {
 
       {/* Form */}
       <AnimatePresence>
-        {(isAdding || editingId) && <RewardForm />}
+        {(isAdding || editingId) && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-amber-900/40 rounded-2xl p-4 mb-4 border border-amber-500/40"
+          >
+            <h3 className="text-white font-black mb-4">{isAdding ? '➕ New Reward' : '✏️ Edit Reward'}</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Reward Name *</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
+                  placeholder="e.g. Extra screen time"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-white/30 focus:outline-none focus:border-amber-400 text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Emoji</label>
+                <input
+                  type="text"
+                  value={form.emoji}
+                  onChange={e => setForm(p => ({ ...p, emoji: e.target.value }))}
+                  placeholder="🎁"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white text-center text-2xl focus:outline-none focus:border-amber-400"
+                />
+              </div>
+              <div>
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Point Cost</label>
+                <input
+                  type="number"
+                  min="1"
+                  value={form.point_cost}
+                  onChange={e => setForm(p => ({ ...p, point_cost: Math.max(1, parseInt(e.target.value) || 1) }))}
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none focus:border-amber-400 text-sm"
+                />
+              </div>
+              <div className="col-span-2">
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Category</label>
+                <div className="flex gap-2">
+                  {CATEGORIES.map(cat => (
+                    <button
+                      key={cat}
+                      onClick={() => setForm(p => ({ ...p, category: cat }))}
+                      className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all
+                        ${form.category === cat ? 'bg-amber-500 text-white' : 'bg-white/10 text-white/60 hover:bg-white/20'}`}
+                    >
+                      {CATEGORY_LABELS[cat]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="text-white/60 text-xs font-bold uppercase">Weekend Only</label>
+                <button
+                  onClick={() => setForm(p => ({ ...p, weekend_only: !p.weekend_only }))}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${form.weekend_only ? 'bg-amber-500' : 'bg-gray-600'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow
+                    ${form.weekend_only ? 'translate-x-7' : 'translate-x-1'}`} />
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                <label className="text-white/60 text-xs font-bold uppercase">Active</label>
+                <button
+                  onClick={() => setForm(p => ({ ...p, is_active: !p.is_active }))}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${form.is_active ? 'bg-green-500' : 'bg-gray-600'}`}
+                >
+                  <div className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow
+                    ${form.is_active ? 'translate-x-7' : 'translate-x-1'}`} />
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={cancelEdit} className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-sm">Cancel</button>
+              <button
+                onClick={saveEdit}
+                disabled={!form.name.trim()}
+                className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-white font-black text-sm disabled:opacity-40 transition-all"
+              >
+                {isAdding ? 'Add Reward' : 'Save Changes'}
+              </button>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Reward List */}

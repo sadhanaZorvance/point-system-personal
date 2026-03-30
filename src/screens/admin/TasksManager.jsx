@@ -61,94 +61,6 @@ export default function TasksManager() {
     setConfirmDelete(null)
   }
 
-  const TaskForm = () => (
-    <motion.div
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="rounded-2xl p-4 mb-4 border border-white/20"
-      style={{ background: `${theme.accentColor}20` }}
-    >
-      <h3 className="text-white font-black mb-4">{isAdding ? '➕ New Task' : '✏️ Edit Task'}</h3>
-      <div className="grid grid-cols-2 gap-3">
-        <div className="col-span-2">
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Task Name *</label>
-          <input
-            type="text"
-            value={form.name}
-            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-            placeholder="e.g. Made bed"
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-white/30 focus:outline-none text-sm"
-          />
-        </div>
-        <div>
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Emoji</label>
-          <input
-            type="text"
-            value={form.emoji}
-            onChange={(e) => setForm((p) => ({ ...p, emoji: e.target.value }))}
-            placeholder="⭐"
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white text-center text-2xl focus:outline-none"
-          />
-        </div>
-        <div>
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Points</label>
-          <input
-            type="number"
-            value={form.points}
-            onChange={(e) => setForm((p) => ({ ...p, points: parseInt(e.target.value) || 0 }))}
-            className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none text-sm"
-          />
-          <p className="text-white/40 text-xs mt-1">Negative = deduction</p>
-        </div>
-        <div className="col-span-2">
-          <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Category</label>
-          <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setForm((p) => ({ ...p, category: cat }))}
-                className="px-3 py-1.5 rounded-xl text-sm font-bold transition-all"
-                style={
-                  form.category === cat
-                    ? { backgroundColor: theme.accentColor, color: 'white' }
-                    : { backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }
-                }
-              >
-                {CATEGORY_LABELS[cat]}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="col-span-2 flex items-center gap-2">
-          <label className="text-white/60 text-xs font-bold uppercase">Active</label>
-          <button
-            onClick={() => setForm((p) => ({ ...p, is_active: !p.is_active }))}
-            className={`relative w-12 h-6 rounded-full transition-colors ${form.is_active ? 'bg-green-500' : 'bg-gray-600'}`}
-          >
-            <div
-              className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow ${
-                form.is_active ? 'translate-x-7' : 'translate-x-1'
-              }`}
-            />
-          </button>
-        </div>
-      </div>
-      <div className="flex gap-3 mt-4">
-        <button onClick={cancelEdit} className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-sm">
-          Cancel
-        </button>
-        <button
-          onClick={saveEdit}
-          disabled={!form.name.trim()}
-          className="flex-1 py-2.5 rounded-xl text-white font-black text-sm disabled:opacity-40 transition-all"
-          style={{ backgroundColor: theme.accentColor }}
-        >
-          {isAdding ? 'Add Task' : 'Save Changes'}
-        </button>
-      </div>
-    </motion.div>
-  )
-
   return (
     <div className="h-full overflow-y-auto scrollbar-hide px-4 py-4">
       {/* Header */}
@@ -186,7 +98,93 @@ export default function TasksManager() {
 
       {/* Form */}
       <AnimatePresence>
-        {(isAdding || editingId) && <TaskForm />}
+        {(isAdding || editingId) && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="rounded-2xl p-4 mb-4 border border-white/20"
+            style={{ background: `${theme.accentColor}20` }}
+          >
+            <h3 className="text-white font-black mb-4">{isAdding ? '➕ New Task' : '✏️ Edit Task'}</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="col-span-2">
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Task Name *</label>
+                <input
+                  type="text"
+                  value={form.name}
+                  onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
+                  placeholder="e.g. Made bed"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white placeholder-white/30 focus:outline-none text-sm"
+                />
+              </div>
+              <div>
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Emoji</label>
+                <input
+                  type="text"
+                  value={form.emoji}
+                  onChange={(e) => setForm((p) => ({ ...p, emoji: e.target.value }))}
+                  placeholder="⭐"
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white text-center text-2xl focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Points</label>
+                <input
+                  type="number"
+                  value={form.points}
+                  onChange={(e) => setForm((p) => ({ ...p, points: parseInt(e.target.value) || 0 }))}
+                  className="w-full bg-white/10 border border-white/20 rounded-xl px-3 py-2.5 text-white focus:outline-none text-sm"
+                />
+                <p className="text-white/40 text-xs mt-1">Negative = deduction</p>
+              </div>
+              <div className="col-span-2">
+                <label className="text-white/60 text-xs font-bold uppercase mb-1 block">Category</label>
+                <div className="flex flex-wrap gap-2">
+                  {CATEGORIES.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setForm((p) => ({ ...p, category: cat }))}
+                      className="px-3 py-1.5 rounded-xl text-sm font-bold transition-all"
+                      style={
+                        form.category === cat
+                          ? { backgroundColor: theme.accentColor, color: 'white' }
+                          : { backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.6)' }
+                      }
+                    >
+                      {CATEGORY_LABELS[cat]}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="col-span-2 flex items-center gap-2">
+                <label className="text-white/60 text-xs font-bold uppercase">Active</label>
+                <button
+                  onClick={() => setForm((p) => ({ ...p, is_active: !p.is_active }))}
+                  className={`relative w-12 h-6 rounded-full transition-colors ${form.is_active ? 'bg-green-500' : 'bg-gray-600'}`}
+                >
+                  <div
+                    className={`absolute top-1 w-4 h-4 bg-white rounded-full transition-transform shadow ${
+                      form.is_active ? 'translate-x-7' : 'translate-x-1'
+                    }`}
+                  />
+                </button>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={cancelEdit} className="flex-1 py-2.5 rounded-xl bg-white/10 text-white font-bold text-sm">
+                Cancel
+              </button>
+              <button
+                onClick={saveEdit}
+                disabled={!form.name.trim()}
+                className="flex-1 py-2.5 rounded-xl text-white font-black text-sm disabled:opacity-40 transition-all"
+                style={{ backgroundColor: theme.accentColor }}
+              >
+                {isAdding ? 'Add Task' : 'Save Changes'}
+              </button>
+            </div>
+          </motion.div>
+        )}
       </AnimatePresence>
 
       {/* Task List — compact 2-col grid */}

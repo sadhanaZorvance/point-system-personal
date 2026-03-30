@@ -1,14 +1,32 @@
-import React from 'react'
-import { motion } from 'framer-motion'
+import React, { useState, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 /**
  * Compact TaskTile — designed for 2-col grid layout.
  * Approx 80px tall, emoji + points badge + task name.
+ * Sparkle burst on tap with random directions.
  */
 export default function TaskTile({ task, onTap, disabled = false, multiplier = 1 }) {
   const isPositive = task.points > 0
   const absPoints = Math.abs(task.points)
   const effectivePoints = isPositive ? absPoints * multiplier : absPoints
+  const [sparkles, setSparkles] = useState([])
+
+  const handleTap = useCallback(() => {
+    if (disabled) return
+    // Spawn sparkle particles from random positions within the tile
+    const newSparkles = Array.from({ length: 6 }, (_, i) => ({
+      id: Date.now() + i,
+      x: 20 + Math.random() * 60,  // % within tile
+      y: 20 + Math.random() * 60,
+      dx: (Math.random() - 0.5) * 80,  // random travel direction
+      dy: -20 - Math.random() * 50,
+      size: 4 + Math.random() * 6,
+    }))
+    setSparkles(newSparkles)
+    setTimeout(() => setSparkles([]), 600)
+    onTap(task)
+  }, [disabled, onTap, task])
 
   const tileClasses = isPositive
     ? 'bg-emerald-800/60 border border-emerald-600/30 text-emerald-100'
@@ -22,8 +40,31 @@ export default function TaskTile({ task, onTap, disabled = false, multiplier = 1
       style={{ minHeight: '72px' }}
       whileHover={disabled ? {} : { scale: 1.03 }}
       whileTap={disabled ? {} : { scale: 0.97 }}
-      onClick={disabled ? undefined : () => onTap(task)}
+      onClick={handleTap}
     >
+      {/* Sparkle burst */}
+      <AnimatePresence>
+        {sparkles.map((s) => (
+          <motion.div
+            key={s.id}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              width: s.size,
+              height: s.size,
+              background: isPositive
+                ? 'radial-gradient(circle, #34d399, #fbbf24)'
+                : 'radial-gradient(circle, #f87171, #fb923c)',
+            }}
+            initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+            animate={{ opacity: 0, scale: 0.3, x: s.dx, y: s.dy }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          />
+        ))}
+      </AnimatePresence>
+
       {/* Points badge — top right */}
       <span className="absolute top-1.5 right-1.5 bg-black/30 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
         {isPositive ? '+' : '-'}{effectivePoints}
@@ -43,10 +84,27 @@ export default function TaskTile({ task, onTap, disabled = false, multiplier = 1
 
 /**
  * Compact RewardTile — designed for 2-col grid layout.
+ * Sparkle burst on tap with random directions.
  */
 export function RewardTile({ reward, currentBalance, onTap, disabled = false }) {
   const canAfford = currentBalance >= reward.point_cost
   const isDisabled = disabled || !canAfford
+  const [sparkles, setSparkles] = useState([])
+
+  const handleTap = useCallback(() => {
+    if (isDisabled) return
+    const newSparkles = Array.from({ length: 5 }, (_, i) => ({
+      id: Date.now() + i,
+      x: 20 + Math.random() * 60,
+      y: 20 + Math.random() * 60,
+      dx: (Math.random() - 0.5) * 70,
+      dy: -15 - Math.random() * 45,
+      size: 4 + Math.random() * 5,
+    }))
+    setSparkles(newSparkles)
+    setTimeout(() => setSparkles([]), 600)
+    onTap(reward)
+  }, [isDisabled, onTap, reward])
 
   return (
     <motion.button
@@ -56,8 +114,29 @@ export function RewardTile({ reward, currentBalance, onTap, disabled = false }) 
       style={{ minHeight: '72px' }}
       whileHover={isDisabled ? {} : { scale: 1.03 }}
       whileTap={isDisabled ? {} : { scale: 0.97 }}
-      onClick={isDisabled ? undefined : () => onTap(reward)}
+      onClick={handleTap}
     >
+      {/* Sparkle burst */}
+      <AnimatePresence>
+        {sparkles.map((s) => (
+          <motion.div
+            key={s.id}
+            className="absolute rounded-full pointer-events-none"
+            style={{
+              left: `${s.x}%`,
+              top: `${s.y}%`,
+              width: s.size,
+              height: s.size,
+              background: 'radial-gradient(circle, #fbbf24, #f59e0b)',
+            }}
+            initial={{ opacity: 1, scale: 1, x: 0, y: 0 }}
+            animate={{ opacity: 0, scale: 0.3, x: s.dx, y: s.dy }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+          />
+        ))}
+      </AnimatePresence>
+
       {/* Cost badge — top right */}
       <span className="absolute top-1.5 right-1.5 bg-black/30 text-white text-xs font-black px-1.5 py-0.5 rounded-full">
         {reward.point_cost}

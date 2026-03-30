@@ -24,13 +24,16 @@ export default function LevelUpCelebration({ levelInfo, lifetimePoints, onDismis
 
   if (!levelInfo) return null
 
-  // Shimmer particles
-  const particles = Array.from({ length: 24 }, (_, i) => ({
+  // Shimmer particles — random origins, sizes, and drift directions
+  const particles = Array.from({ length: 28 }, (_, i) => ({
     id: i,
     x: Math.random() * 100,
-    size: Math.random() * 6 + 4,
-    delay: Math.random() * 1.5,
-    duration: Math.random() * 2 + 2,
+    startY: Math.random() * 100,
+    drift: (Math.random() - 0.5) * 120,
+    size: Math.random() * 8 + 3,
+    delay: Math.random() * 2,
+    duration: Math.random() * 2.5 + 1.5,
+    color: ['#fbbf24', '#a78bfa', '#34d399', '#f472b6', '#60a5fa'][Math.floor(Math.random() * 5)],
   }))
 
   return (
@@ -63,21 +66,24 @@ export default function LevelUpCelebration({ levelInfo, lifetimePoints, onDismis
           {/* Backdrop blur darkening */}
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
 
-          {/* Shimmer particles floating up */}
+          {/* Shimmer particles — random origins, colors, and drift */}
           {particles.map((p) => (
             <motion.div
               key={p.id}
-              className="absolute rounded-full bg-amber-400/60"
+              className="absolute rounded-full"
               style={{
                 left: `${p.x}%`,
-                bottom: 0,
+                top: `${p.startY}%`,
                 width: p.size,
                 height: p.size,
+                backgroundColor: p.color,
+                opacity: 0.6,
               }}
               animate={{
-                y: [0, -(window.innerHeight + 40)],
-                opacity: [0, 0.8, 0],
-                scale: [1, 1.2, 0.6],
+                y: [0, -(window.innerHeight * 0.5 + Math.random() * window.innerHeight * 0.5)],
+                x: [0, p.drift],
+                opacity: [0, 0.9, 0],
+                scale: [0.5, 1.3, 0.4],
               }}
               transition={{
                 duration: p.duration,
